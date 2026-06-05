@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Calendar, Clock, User, Scan, CheckCircle2, XCircle, ExternalLink } from 'lucide-react';
+import { Calendar, Clock, User, Scan } from 'lucide-react';
 import Select from 'react-select';
 
 const customSelectStyles = {
@@ -9,18 +9,29 @@ const customSelectStyles = {
     padding: '4px',
     borderColor: '#e2e8f0',
     backgroundColor: '#f8fafc',
-    '&:hover': { borderColor: '#cbd5e1' },
+    '&:hover': {
+      borderColor: '#cbd5e1',
+    },
+  }),
+
+  menu: (base) => ({
+    ...base,
+    zIndex: 9999,
+  }),
+
+  menuPortal: (base) => ({
+    ...base,
+    zIndex: 9999,
   }),
 };
 
 function Add() {
   const [masters, setMasters] = useState([]);
-  const [selectedImage, setSelectedImage] = useState('');
-  const [imageError, setImageError] = useState(false);
-
   const [form, setForm] = useState({
     scan: '',
-    date: new Date().toISOString().split('T')[0],
+    date: new Date().toLocaleDateString('en-CA', {
+      timeZone: 'Asia/Kolkata',
+    }),
     shift: '',
     masterName: '',
     attendanceType: 'IN',
@@ -53,21 +64,32 @@ function Add() {
     e.preventDefault();
 
     try {
-      await fetch(
-        'https://script.google.com/macros/s/AKfycbwx1U9qnfxPCKJYhKw5ZiCr2t1RYJMUrs4iIKURyFY2OmrWbRDsuVKepiF5NxTW6E9qDQ/exec',
+      const response = await fetch(
+        'https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec',
+        
         {
           method: 'POST',
           body: JSON.stringify(form),
         }
       );
 
-      alert('Saved Successfully');
+      const result = await response.json();
+
+      if (!result.success) {
+        alert(result.message);
+        return;
+      }
+
+      alert(result.message);
 
       setForm({
         scan: '',
-        date: new Date().toISOString().split('T')[0],
+        date: new Date().toLocaleDateString('en-CA', {
+          timeZone: 'Asia/Kolkata',
+        }),
         shift: '',
         masterName: '',
+        attendanceType: 'IN',
       });
     } catch (err) {
       console.error(err);
@@ -104,13 +126,62 @@ function Add() {
                 </label>
                 <select
                   value={form.scan}
-                  onChange={(e) => setForm({ ...form, scan: e.target.value })}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      scan: e.target.value,
+                      masterName: '',
+                    })
+                  }
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none"
                 >
                   <option value="">Select Status</option>
+                  <option value="OPEN">OPEN</option>
                   <option value="SCAN">SCAN</option>
                   <option value="NON_SCAN">NON_SCAN</option>
                 </select>
+              </div>
+
+              {/* Master Name */}
+              <div>
+                <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700 z-50">
+                  <User size={16} className="text-blue-600" />
+                  Master Name
+                </label>
+
+                {form.scan === 'OPEN' ? (
+                  <input
+                    type="text"
+                    placeholder="Enter Master Name"
+                    value={form.masterName}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        masterName: e.target.value.toUpperCase(),
+                      })
+                    }
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 uppercase"
+                  />
+                ) : (
+                  <Select
+                    options={masters.map((item) => ({
+                      value: item.name,
+                      label: item.name,
+                    }))}
+                    styles={customSelectStyles}
+                    placeholder="Search Master Name..."
+                    isSearchable
+                    value={
+                      form.masterName ? { value: form.masterName, label: form.masterName } : null
+                    }
+                    onChange={(selected) => {
+                      setForm({
+                        ...form,
+                        masterName: selected?.value || '',
+                      });
+                    }}
+                  />
+                )}
               </div>
 
               {/* Date */}
@@ -173,60 +244,6 @@ function Add() {
                   ))}
                 </div>
               </div>
-
-              {/* Master Name */}
-              <div>
-                <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700">
-                  <User size={16} className="text-blue-600" />
-                  Master Name
-                </label>
-                <Select
-                  options={masters.map((item) => ({
-                    value: item.name,
-                    label: item.name,
-                    image: item.image,
-                  }))}
-                  styles={customSelectStyles} // Optional: Pass custom styles for better matching
-                  placeholder="Search Master Name..."
-                  isSearchable
-                  value={
-                    form.masterName ? { value: form.masterName, label: form.masterName } : null
-                  }
-                  onChange={(selected) => {
-                    setForm({ ...form, masterName: selected?.value || '' });
-                    setSelectedImage(selected?.image || '');
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* Verification Status Area */}
-            <div
-              className={`mt-2 p-4 rounded-2xl border-2 border-dashed transition-all duration-300 ${
-                selectedImage ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'
-              }`}
-            >
-              {selectedImage ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="flex items-center gap-2 text-emerald-700 font-bold">
-                    <CheckCircle2 size={20} />
-                    Verified Identity
-                  </div>
-                  <a
-                    href={selectedImage}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 bg-white text-blue-600 border border-blue-200 px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-50 transition-colors shadow-sm"
-                  >
-                    View Credentials <ExternalLink size={14} />
-                  </a>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-400 py-2">
-                  <XCircle size={24} className="text-slate-300" />
-                  <span className="text-sm font-medium">Pending Verification</span>
-                </div>
-              )}
             </div>
 
             {/* Submit */}
