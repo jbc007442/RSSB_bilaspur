@@ -166,12 +166,12 @@ const Update = () => {
                       <td className="p-4 text-sm font-semibold text-gray-800">{row.masterName}</td>
                       <td className="p-4">
                         <div className="flex gap-3">
-                          <button
+                          {/* <button
                             onClick={() => handleEdit(row)}
                             className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors"
                           >
                             Edit
-                          </button>
+                          </button> */}
                           <button
                             onClick={() => handleDelete(row)}
                             className="text-red-500 hover:text-red-700 font-medium text-sm transition-colors"

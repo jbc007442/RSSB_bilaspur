@@ -1,5 +1,6 @@
+import { User2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate} from 'react-router-dom';
 
 import { toast } from 'react-toastify';
 
@@ -109,12 +110,25 @@ const Header = () => {
                 Login
               </Link>
             ) : (
-              <button
-                onClick={logout}
-                className="px-4 py-2 rounded-full bg-red-600 text-white text-sm font-medium"
-              >
-                Logout
-              </button>
+              <>
+                <span
+                  className={`px-3 py-2 text-sm font-semibold ${
+                    scrolled ? 'text-slate-700' : 'text-white'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <User2 size={16} />
+                    <span>{user.email.split('@')[0]}</span>
+                  </div>
+                </span>
+
+                <button
+                  onClick={logout}
+                  className="px-4 py-2 rounded-full bg-red-600 text-white text-sm font-medium"
+                >
+                  Logout
+                </button>
+              </>
             )}
           </nav>
 
@@ -177,15 +191,24 @@ const Header = () => {
               🔐 Login
             </Link>
           ) : (
-            <button
-              onClick={() => {
-                setOpen(false);
-                logout();
-              }}
-              className="w-full text-left flex items-center gap-4 p-4 rounded-xl text-red-600 hover:bg-red-50"
-            >
-              🚪 Logout
-            </button>
+            <>
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 text-blue-700 font-semibold">
+                <div className="flex items-center gap-2">
+                  <User2 size={16} />
+                  <span>{user.email.split('@')[0]}</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  logout();
+                }}
+                className="w-full text-left flex items-center gap-4 p-4 rounded-xl text-red-600 hover:bg-red-50"
+              >
+                🚪 Logout
+              </button>
+            </>
           )}
         </nav>
       </aside>

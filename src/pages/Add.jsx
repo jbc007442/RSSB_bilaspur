@@ -29,13 +29,11 @@ function Add() {
   const [masters, setMasters] = useState([]);
   const [form, setForm] = useState({
     scan: '',
-    date: new Date().toLocaleDateString('en-CA', {
-      timeZone: 'Asia/Kolkata',
-    }),
     shift: '',
     masterName: '',
     attendanceType: 'IN',
   });
+  const user = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
     const loadMasters = async () => {
@@ -63,13 +61,27 @@ function Add() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // const payload = {
+    //   ...form,
+    //   date: new Date().toLocaleDateString('en-CA', {
+    //     timeZone: 'Asia/Kolkata',
+    //   }),
+    // };
+    const payload = {
+      ...form,
+      createdBy: user?.email || '',
+      date: new Date().toLocaleDateString('en-CA', {
+        timeZone: 'Asia/Kolkata',
+      }),
+    };
+
     try {
       const response = await fetch(
         'https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec',
-        
+
         {
           method: 'POST',
-          body: JSON.stringify(form),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -84,9 +96,6 @@ function Add() {
 
       setForm({
         scan: '',
-        date: new Date().toLocaleDateString('en-CA', {
-          timeZone: 'Asia/Kolkata',
-        }),
         shift: '',
         masterName: '',
         attendanceType: 'IN',
@@ -106,7 +115,16 @@ function Add() {
         <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-br from-blue-700 to-blue-800 text-white p-8">
-            <h1 className="text-3xl font-extrabold tracking-tight text-center">AMS OF JULY</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight text-center">
+              AMS OF{' '}
+              {new Date()
+                .toLocaleString('en-US', {
+                  month: 'long',
+                  day: '2-digit',
+                  year: 'numeric',
+                })
+                .toUpperCase()}
+            </h1>
             <div className="flex items-center justify-center gap-2 mt-2">
               <span className="h-1.5 w-1.5 rounded-full bg-blue-300 animate-pulse" />
               <p className="text-blue-100 text-sm font-medium uppercase tracking-wider">
@@ -182,20 +200,6 @@ function Add() {
                     }}
                   />
                 )}
-              </div>
-
-              {/* Date */}
-              <div>
-                <label className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-700">
-                  <Calendar size={16} className="text-blue-600" />
-                  Attendance Date
-                </label>
-                <input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-slate-700 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
-                />
               </div>
 
               {/* Shift */}

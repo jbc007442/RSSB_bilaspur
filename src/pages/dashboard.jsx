@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, UserCheck, UserX, Activity, CheckCircle2, XCircle, UserRound } from 'lucide-react';
+import { Users, UserCheck, UserX, Activity, CheckCircle2, Clock3, UserRound } from 'lucide-react';
 
 const Dashboard = () => {
   const [attendance, setAttendance] = useState([]);
@@ -18,7 +18,7 @@ const Dashboard = () => {
     const interval = setInterval(() => {
       fetchDashboard();
       fetchAttendance();
-    }, 300); // 3 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -40,7 +40,7 @@ const Dashboard = () => {
   const fetchAttendance = async () => {
     try {
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec?type=workhours'
+        'https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec?type=attendance'
       );
 
       const data = await response.json();
@@ -50,6 +50,11 @@ const Dashboard = () => {
       console.error('Attendance Error:', error);
     }
   };
+
+  const pendingCount = attendance.filter(
+    (row) => row.attendanceType === 'IN' && row.status === 'PENDING'
+  ).length;
+
   // Mock data for easy iteration
   const stats = [
     {
@@ -60,25 +65,18 @@ const Dashboard = () => {
       icon: Users,
     },
     {
-      label: 'Total Gents',
-      value: dashboardData.totalGents,
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
-      icon: UserRound,
-    },
-    {
-      label: 'Total Ladies',
-      value: dashboardData.totalLadies,
-      color: 'text-pink-600',
-      bg: 'bg-pink-50',
-      icon: UserCheck,
-    },
-    {
       label: 'Present Today',
       value: dashboardData.presentToday,
       color: 'text-emerald-600',
       bg: 'bg-emerald-50',
       icon: CheckCircle2,
+    },
+    {
+      label: 'Total Pending',
+      value: pendingCount,
+      color: 'text-yellow-600',
+      bg: 'bg-yellow-50',
+      icon: Clock3,
     },
   ];
 
@@ -129,11 +127,11 @@ const Dashboard = () => {
         </div>
 
         {/* Main Grid */}
-        <div className="">
-          {/* Recent Attendance Table */}
-          <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+        <div>
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 border-b border-slate-50 flex justify-between items-center">
               <h2 className="text-xl font-bold text-slate-800">Recent Attendance</h2>
+
               <button className="text-blue-600 text-sm font-bold hover:underline">View All</button>
             </div>
 
@@ -142,52 +140,94 @@ const Dashboard = () => {
                 <thead>
                   <tr className="bg-slate-50/50">
                     <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                      Employee
+                      SEVADAAR
                     </th>
+
                     <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
                       Date
                     </th>
+
                     <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
                       Shift
                     </th>
+
                     <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                      Work Hours
+                      Type
+                    </th>
+
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      Status
+                    </th>
+
+                    <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      Hours
                     </th>
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-slate-50">
-                  {attendance.map((row, i) => (
-                    <tr key={i} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">
-                            {row.name?.charAt(0)}
+                  {attendance
+                    .filter((row) => row.attendanceType === 'IN')
+                    .slice(0, 10)
+                    .map((row, i) => (
+                      <tr key={i} className="hover:bg-slate-50/50 transition-colors">
+                        {/* Employee */}
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600 text-xs">
+                              {row.masterName?.charAt(0)}
+                            </div>
+
+                            <span className="font-semibold text-slate-700">{row.masterName}</span>
                           </div>
-                          <span className="font-semibold text-slate-700">{row.name}</span>
-                        </div>
-                      </td>
+                        </td>
 
-                      <td className="p-4 text-slate-500 text-sm">{row.date}</td>
+                        {/* Date */}
+                        <td className="p-4 text-slate-500 text-sm">{row.date}</td>
 
-                      <td className="p-4">
-                        <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold">
-                          {row.shift}
-                        </span>
-                      </td>
+                        {/* Shift */}
+                        <td className="p-4">
+                          <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold">
+                            {row.shift}
+                          </span>
+                        </td>
 
-                      <td className="p-4">
-                        <span
-                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                            row.workHours === 'Running'
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-blue-100 text-blue-700'
-                          }`}
-                        >
-                          {row.workHours}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        {/* Type */}
+                        <td className="p-4">
+                          <span
+                            className={`px-3 py-1 rounded-lg text-xs font-bold ${
+                              row.attendanceType === 'IN'
+                                ? 'bg-green-100 text-green-700'
+                                : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {row.attendanceType}
+                          </span>
+                        </td>
+
+                        {/* Status */}
+                        <td className="p-4">
+                          {row.status ? (
+                            <span
+                              className={`px-3 py-1 rounded-lg text-xs font-bold ${
+                                row.status === 'DONE'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-yellow-100 text-yellow-700'
+                              }`}
+                            >
+                              {row.status}
+                            </span>
+                          ) : (
+                            '-'
+                          )}
+                        </td>
+
+                        {/* Work Hours */}
+                        <td className="p-4 font-semibold text-slate-700">
+                          {row.workHours || '--'}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
