@@ -37,13 +37,19 @@ const Dashboard = () => {
     }
   };
 
+
+
   const fetchAttendance = async () => {
     try {
+      const user = JSON.parse(localStorage.getItem('user'));
+
       const response = await fetch(
-        'https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec?type=attendance'
+        `https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec?type=attendance&email=${encodeURIComponent(user.email)}`
       );
 
       const data = await response.json();
+
+      console.log('Attendance Data:', data);
 
       setAttendance(data);
     } catch (error) {

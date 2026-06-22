@@ -60,13 +60,6 @@ function Add() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // const payload = {
-    //   ...form,
-    //   date: new Date().toLocaleDateString('en-CA', {
-    //     timeZone: 'Asia/Kolkata',
-    //   }),
-    // };
     const payload = {
       ...form,
       createdBy: user?.email || '',
@@ -101,8 +94,10 @@ function Add() {
         attendanceType: 'IN',
       });
     } catch (err) {
-      console.error(err);
-      alert('Error saving data');
+      // console.error(err);
+      // alert('Error saving data');
+      console.error('FULL ERROR:', err);
+      alert(err.message);
     }
   };
 

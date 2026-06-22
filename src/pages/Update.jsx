@@ -41,11 +41,32 @@ const Update = () => {
   const [masters, setMasters] = useState([]);
   const [saving, setSaving] = useState(false);
 
+  // const loadData = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(`${API_URL}?type=attendance`);
+  //     const data = await response.json();
+  //     setRecords(data);
+  //   } catch (error) {
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
   const loadData = async () => {
     setLoading(true);
+
     try {
-      const response = await fetch(`${API_URL}?type=attendance`);
+      const user = JSON.parse(localStorage.getItem('user'));
+
+      const response = await fetch(
+        `${API_URL}?type=attendance&email=${encodeURIComponent(user.email)}`
+      );
+
       const data = await response.json();
+
       setRecords(data);
     } catch (error) {
       console.error(error);
