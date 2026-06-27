@@ -64,7 +64,7 @@ const Dashboard = () => {
   // Mock data for easy iteration
   const stats = [
     {
-      label: 'Total Employees',
+      label: 'Sewadaars',
       value: dashboardData.totalEmployees,
       color: 'text-blue-600',
       bg: 'bg-blue-50',
