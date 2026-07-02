@@ -157,7 +157,7 @@ const Header = () => {
       >
         <div className="flex justify-between items-center p-6 border-b">
           <div>
-            <h2 className="font-bold text-blue-700">Bhawani Traders</h2>
+            <h2 className="font-bold text-blue-700">RSSB Bilaspur</h2>
             <p className="text-xs text-slate-400">Management Menu</p>
           </div>
 

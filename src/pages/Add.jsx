@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Calendar, Clock, User, Scan } from 'lucide-react';
 import Select from 'react-select';
+import { toast } from 'react-toastify';
 
 const customSelectStyles = {
   control: (base) => ({
@@ -25,8 +26,11 @@ const customSelectStyles = {
   }),
 };
 
+
+
 function Add() {
   const [masters, setMasters] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     scan: '',
     shift: '',
@@ -34,6 +38,25 @@ function Add() {
     attendanceType: 'IN',
   });
   const user = JSON.parse(localStorage.getItem('user'));
+
+  const validateForm = () => {
+    if (!form.scan) {
+      toast.error('Please select Scan Status');
+      return false;
+    }
+
+    if (!form.masterName.trim()) {
+      toast.error('Please select or enter Master Name');
+      return false;
+    }
+
+    if (!form.attendanceType) {
+      toast.error('Please select Attendance Type');
+      return false;
+    }
+
+    return true;
+  };
 
   useEffect(() => {
     const loadMasters = async () => {
@@ -60,6 +83,9 @@ function Add() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     const payload = {
       ...form,
       createdBy: user?.email || '',
@@ -71,7 +97,6 @@ function Add() {
     try {
       const response = await fetch(
         'https://script.google.com/macros/s/AKfycbxWr4zf70Sy9q-RiYo6SqnlTSZRyxxbMk0eSXmFAcNAvjkpvPMjKlquPCfX_mEqCwXNFg/exec',
-
         {
           method: 'POST',
           body: JSON.stringify(payload),
@@ -81,11 +106,11 @@ function Add() {
       const result = await response.json();
 
       if (!result.success) {
-        alert(result.message);
+        toast.error(result.message);
         return;
       }
 
-      alert(result.message);
+      toast.success(result.message);
 
       setForm({
         scan: '',
@@ -94,10 +119,8 @@ function Add() {
         attendanceType: 'IN',
       });
     } catch (err) {
-      // console.error(err);
-      // alert('Error saving data');
-      console.error('FULL ERROR:', err);
-      alert(err.message);
+      console.error(err);
+      toast.error(err.message || 'Something went wrong');
     }
   };
 
@@ -248,9 +271,10 @@ function Add() {
             {/* Submit */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-blue-700 hover:bg-blue-800 active:transform active:scale-[0.98] text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all duration-200 mt-4 flex justify-center items-center gap-2"
             >
-              Submit Attendance Entry
+              {loading ? 'Submitting...' : 'Submit Attendance Entry'}
             </button>
           </form>
         </div>
